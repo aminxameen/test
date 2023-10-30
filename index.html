@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Google Drive API Integration</title>
+    <style>
+        .block-box {
+            width: 300px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="block-box">
+        <h2>Google Drive Folder Contents</h2>
+        <ul id="file-list">
+            <!-- File list will be populated here -->
+        </ul>
+    </div>
+
+    <script>
+        // Replace with your actual API key and OAuth 2.0 Client ID
+        var apiKey = 'AIzaSyCwro-_0CkP4chVykLqM2ze--BmNPkwEBU';
+        var clientId = '906833437542-pg95ihuf2vlr007dor69elo07ilqrr5l.apps.googleusercontent.com';
+
+        // The ID of the Google Drive folder
+        var folderId = '1TIDUoUo-hDAG-5txKWkBamn9dhYh7HHm';
+
+        // Function to load the Google Drive API and authenticate
+        function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+        }
+
+        function initClient() {
+            gapi.client.init({
+                apiKey: apiKey,
+                clientId: clientId,
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+            }).then(function () {
+                // Authenticate with the Google Drive API
+                return gapi.auth2.getAuthInstance().signIn();
+            }).then(function () {
+                // List files in the specified folder
+                gapi.client.drive.files.list({
+                    q: "'" + folderId + "' in parents",
+                    fields: 'files(name, webViewLink)'
+                }).then(function (response) {
+                    var files = response.result.files;
+                    var fileList = document.getElementById('file-list');
+
+                    if (files && files.length > 0) {
+                        files.forEach(function (file) {
+                            var li = document.createElement('li');
+                            li.innerHTML = '<a href="' + file.webViewLink + '" target="_blank">' + file.name + '</a>';
+                            fileList.appendChild(li);
+                        });
+                    } else {
+                        fileList.innerHTML = 'No files found in the folder.';
+                    }
+                });
+            });
+        }
+    </script>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        // Load the Google Drive API and authenticate
+        handleClientLoad();
+    </script>
+</body>
+</html>
